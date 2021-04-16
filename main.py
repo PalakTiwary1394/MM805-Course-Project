@@ -71,9 +71,6 @@ if __name__ == '__main__':
     layer_names = ['feature_fusion/Conv_7/Sigmoid', 'feature_fusion/concat_3']
 
     if not args.get('video', False):
-        # print("[INFO] starting video stream...")
-        # vs = VideoStream(src=0).start()
-        # time.sleep(1)
         print("No Input Video provided...Program exiting")
         exit()
 
