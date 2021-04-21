@@ -49,12 +49,6 @@ def get_arguments():
     ap = argparse.ArgumentParser()
     ap.add_argument('-v', '--video', type=str,
                     help='path to optional video file')
-    ap.add_argument('-c', '--min_confidence', type=float, default=0.5,
-                    help='minimum confidence to process a region')
-    ap.add_argument('-w', '--width', type=int, default=320,
-                    help='resized image width (multiple of 32)')
-    ap.add_argument('-e', '--height', type=int, default=320,
-                    help='resized image height (multiple of 32)')
     arguments = vars(ap.parse_args())
 
     return arguments
@@ -64,9 +58,7 @@ if __name__ == '__main__':
 
     args = get_arguments()
 
-    w, h = None, None
-    new_w, new_h = args['width'], args['height']
-    ratio_w, ratio_h = None, None
+    (new_w, new_h) = (640, 320);
 
     layer_names = ['feature_fusion/Conv_7/Sigmoid', 'feature_fusion/concat_3']
 
@@ -92,20 +84,20 @@ if __name__ == '__main__':
 
         frame = imutils.resize(frame, width=1000)
         orig = frame.copy()
+        copy = frame.copy()
 
-        if w is None or h is None:
-            h, w = frame.shape[:2]
-            ratio_w = w / float(new_w)
-            ratio_h = h / float(new_h)
+        h, w = frame.shape[:2]
+        ratio_w = w / float(new_w)
+        ratio_h = h / float(new_h)
 
         frame = cv2.resize(frame, (new_w, new_h))
 
-        blob = cv2.dnn.blobFromImage(frame, 1.0, (new_w, new_h), (123.68, 116.78, 103.94),
-                                     swapRB=True, crop=False)
+        blob = cv2.dnn.blobFromImage(frame, 1.0, (new_w, new_h), (103.94, 116.78, 123.68),
+                                     swapRB=False, crop=False)
         net.setInput(blob)
         scores, geometry = net.forward(layer_names)
 
-        rectangles, confidences = box_extractor(scores, geometry, min_confidence=args['min_confidence'])
+        rectangles, confidences = box_extractor(scores, geometry, 0.4)
         boxes = non_max_suppression(np.array(rectangles), probs=confidences)
 
         for (start_x, start_y, end_x, end_y) in boxes:
@@ -117,7 +109,7 @@ if __name__ == '__main__':
             cv2.rectangle(orig, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
 
         fps.update()
-
+        cv2.imshow("Original", copy)
         cv2.imshow("Detection", orig)
         key = cv2.waitKey(1) & 0xFF
 
