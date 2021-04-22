@@ -107,6 +107,7 @@ if __name__ == '__main__':
             end_y = int(end_y * ratio_h)
 
             cv2.rectangle(orig, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
+            print(end_x)
 
         fps.update()
         cv2.imshow("Original", copy)
