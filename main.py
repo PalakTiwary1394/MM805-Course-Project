@@ -6,7 +6,9 @@ import argparse
 import imutils
 import time
 import cv2
+import pytesseract
 
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
 
 def box_extractor(scores, geometry, min_confidence):
     num_rows, num_cols = scores.shape[2:4]
@@ -70,7 +72,7 @@ if __name__ == '__main__':
         vs = cv2.VideoCapture(args['video'])
 
     print("[INFO] loading EAST text detector...")
-    net = cv2.dnn.readNet("C:\\Users\\tiwar\\PycharmProjects\\MM805\\frozen_east_text_detection.pb")
+    net = cv2.dnn.readNet("frozen_east_text_detection.pb")
 
     fps = FPS().start()
 
@@ -100,15 +102,16 @@ if __name__ == '__main__':
         rectangles, confidences = box_extractor(scores, geometry, 0.4)
         boxes = non_max_suppression(np.array(rectangles), probs=confidences)
 
+        img_char = pytesseract.image_to_string(frame)
         for (start_x, start_y, end_x, end_y) in boxes:
             start_x = int(start_x * ratio_w)
             start_y = int(start_y * ratio_h)
             end_x = int(end_x * ratio_w)
             end_y = int(end_y * ratio_h)
+            # print(start_x,start_y)
 
             cv2.rectangle(orig, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
-            print(end_x)
-
+        print(img_char)
         fps.update()
         cv2.imshow("Original", copy)
         cv2.imshow("Detection", orig)
