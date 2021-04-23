@@ -84,9 +84,12 @@ if __name__ == '__main__':
         if frame is None:
             break
 
-        frame = imutils.resize(frame, width=1000)
+        frame = imutils.resize(frame, width=500)
         orig = frame.copy()
         copy = frame.copy()
+
+        frame1 = cv2.imread("bg.jpg")
+        frame1 = imutils.resize(frame1, width=1000)
 
         h, w = frame.shape[:2]
         ratio_w = w / float(new_w)
@@ -111,10 +114,21 @@ if __name__ == '__main__':
             # print(start_x,start_y)
 
             cv2.rectangle(orig, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
+
+
+        cv2.putText(frame1, img_char, (0,40), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0),
+                    1,
+                    cv2.LINE_4)
+
         print(img_char)
+
+        outfile = open('new.txt', 'w')
+        outfile.write(img_char)
+
         fps.update()
         cv2.imshow("Original", copy)
         cv2.imshow("Detection", orig)
+        cv2.imshow("Frame", frame1)
         key = cv2.waitKey(1) & 0xFF
 
         if key == ord('x'):
